@@ -1,5 +1,5 @@
-import React from "react";
+const Diary = ({ navigation }) => {
+  return console.log("diary");
+};
 
-export default function Diary({ navigation }) {
-  return console.log("ugh3");
-}
+export default Diary;

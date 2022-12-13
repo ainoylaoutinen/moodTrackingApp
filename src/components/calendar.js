@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Mood from "./Mood";
-import saveMood from "./saveMood";
 import { Calendar } from "react-native-calendars";
 import {
   View,
@@ -8,21 +6,35 @@ import {
   TouchableOpacity,
   Text,
   Modal,
-  TextInput,
   FlatList,
   Button,
 } from "react-native";
-import { ref, onValue } from "firebase/database";
-import database from "./saveMood";
+import { getDatabase, set, ref, push, onValue } from "firebase/database";
+import { initializeApp } from "firebase/app";
+import { SelectList } from "react-native-dropdown-select-list";
 
-const CalendarView = ({ navigation }) => {
+const firebaseConfig = {
+  apiKey: "AIzaSyCd0G6AFBNXCVri3rQMKI09WYhuI3dLkCQ",
+  authDomain: "mood-e169b.firebaseapp.com",
+  databaseURL:
+    "https://mood-e169b-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "mood-e169b",
+  storageBucket: "mood-e169b.appspot.com",
+  messagingSenderId: "582505707015",
+  appId: "1:582505707015:web:94abc1ba81ca5260221ca2",
+  measurementId: "G-M021LDGZ02",
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
+const CalendarView = () => {
   const [showModal, setShowModal] = useState(true);
   const [showMoodInput, setShowMoodInput] = useState(false);
-  const [mood, setMood] = useState("");
   const [date, setDate] = useState("");
   const [items, setItems] = useState([]);
-
-  console.log(items);
+  const [selected, setSelected] = React.useState([]);
+  //selected represents mood
 
   useEffect(() => {
     const itemsRef = ref(database, "items/");
@@ -35,6 +47,24 @@ const CalendarView = ({ navigation }) => {
       }
     });
   }, []);
+
+  const saveMood = (selected, date) => {
+    if (selected && date) {
+      push(ref(database, "items/"), {
+        selected: selected,
+        date: date,
+      });
+    }
+  };
+
+  const moodOptions = [
+    { key: "1", value: "very happy" },
+    { key: "2", value: "happy" },
+    { key: "3", value: "ok" },
+    { key: "4", value: "mood swings" },
+    { key: "5", value: "sad" },
+    { key: "6", value: "very sad" },
+  ];
 
   return (
     <View style={styles.container}>
@@ -63,42 +93,62 @@ const CalendarView = ({ navigation }) => {
             setShowMoodInput(true);
           }}
           onMonthChange={() => {}}
-          //initialDate={"2022-02-11"}
           hideExtraDays={false}
-          //markedDates={{
-          //"2022-02-11": {
-          //marked: true,
-          //dotColor: "red",
-          //selected: true,
-          //selectedColor: "purple",
-          //selectedTextColor: "white",
-          //},
-          //}}
         />
-        <TextInput
-          placeholder="how are you today?"
+        <Text
           style={{
-            marginTop: 150,
-            fontSize: 18,
-            width: 200,
-            borderColor: "gray",
-            borderWidth: 1,
+            marginBottom: "5%",
+            fontSize: 20,
+            alignItems: "center",
+            fontFamily: "Cochin",
           }}
-          onChangeText={(mood) => setMood(mood)}
-          value={mood}
+        >
+          How are you today?
+        </Text>
+        <Text
+          style={{
+            marginBottom: "5%",
+            fontSize: 15,
+            alignItems: "center",
+            fontFamily: "Cochin",
+          }}
+        >
+          Please select only one mood per day.
+        </Text>
+        <SelectList
+          setSelected={(val) => setSelected(val)}
+          data={moodOptions}
+          save="value"
         />
         <View style>
-          <Button onPress={saveMood(mood, date)} title="Save" />
-          <Text style={{ marginTop: 30, fontSize: 20 }}>Moods</Text>
+          <Button onPress={() => saveMood(selected, date)} title="Save" />
+          <Text
+            style={{
+              marginTop: 5,
+              fontSize: 20,
+              alignItems: "center",
+              fontFamily: "Cochin",
+            }}
+          >
+            Past moods
+          </Text>
         </View>
         <FlatList
-          style={{ marginLeft: "5%" }}
-          //keyExtractor={(item) => index.toString()}
+          style={{
+            marginTop: "5%",
+            fontWeight: "bold",
+          }}
           data={items}
           renderItem={({ item }) => (
             <View>
-              <Text>
-                {item.mood},{item.date}{" "}
+              <Text style={{ fontSize: 15, fontFamily: "Cochin" }}>
+                {item.date.day}
+                {"."}
+                {item.date.month}
+                {"."}
+                {item.date.year}
+                {" : "}
+                {item.selected}
               </Text>
             </View>
           )}

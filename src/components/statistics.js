@@ -1,5 +1,5 @@
-import React from "react";
+const Statistics = ({ navigation }) => {
+  return console.log("stats");
+};
 
-export default function Statistics({ navigation }) {
-  return console.log("ugh2");
-}
+export default Statistics;

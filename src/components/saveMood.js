@@ -1,9 +1,9 @@
-import app from "../../firebase";
+import database from "./calendar";
 import { getDatabase, set, ref, push, onValue } from "firebase/database";
 import React, { useEffect } from "react";
 
 export default function saveMood(mood, date) {
-  const database = getDatabase(app);
+  //const database = getDatabase(app);
 
   if (mood && date) {
     push(ref(database, "items/"), {
